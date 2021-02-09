@@ -17,6 +17,10 @@ VideoStream = function(options) {
   this.width = options.width
   this.height = options.height
   this.wsPort = options.wsPort
+
+  this.wssPort = options.wssPort
+  this.wssOptions = options.wssOptions
+
   this.inputStreamStarted = false
   this.stream = undefined
   this.startMpeg1Stream()
@@ -88,9 +92,17 @@ VideoStream.prototype.startMpeg1Stream = function() {
 }
 
 VideoStream.prototype.pipeStreamToSocketServer = function() {
-  this.wsServer = new ws.Server({
-    port: this.wsPort
-  })
+  if (this.wssPort != undefined && this.wssOptions != undefined) {
+    let settings = this.wssOptions
+    settings.port = this.wssPort
+
+    this.wsServer = new ws.Server(settings)
+  }
+  else {
+    this.wsServer = new ws.Server({
+      port: this.wsPort
+    })
+  }
   this.wsServer.on("connection", (socket, request) => {
     return this.onSocketConnect(socket, request)
   })
